@@ -1,0 +1,1002 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-02-02T10:01:46-06:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Overtrained</title><subtitle>This is a blog about data science, machine learning, and other  related topics written by data professionals.</subtitle><author><name>Overtrained Team</name></author><entry><title type="html">End-to-End Machine Learning Project</title><link href="http://localhost:4000/machine%20learning/python/2021/09/09/end-to-end-ml-project.html" rel="alternate" type="text/html" title="End-to-End Machine Learning Project" /><published>2021-09-09T09:00:00-05:00</published><updated>2021-09-09T09:00:00-05:00</updated><id>http://localhost:4000/machine%20learning/python/2021/09/09/end-to-end-ml-project</id><content type="html" xml:base="http://localhost:4000/machine%20learning/python/2021/09/09/end-to-end-ml-project.html"><![CDATA[<h2 id="purpose">Purpose</h2>
+
+<p>This post is the first entry in a series where I’ll be working through Aurelien Geron’s exceptional book <a href="https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/">Hands-on Machine Learning with Scikit-Learn, Keras &amp; Tensorflow</a>.  I find the most effective way to learn from these kinds of materials is to carefully work through the code and editorialize as I go.  This series will be the documentation of my efforts doing just that.  In this post, I’m working through Chapter 2 of the book - “End-to-End Machine Learning Project”.  The github repo of my ongoing work through this book can be found <a href="https://github.com/mcnewcp/book-geron-ml-sklearn-keras-tensorflow">here</a>.</p>
+
+<h2 id="get-the-data">Get The Data</h2>
+
+<h3 id="loading-the-data">Loading the Data</h3>
+
+<p>First I’m going to download the data from github using a function defined in <code class="language-plaintext highlighter-rouge">utils.py</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">utils</span> <span class="k">as</span> <span class="n">ut</span>
+<span class="n">ut</span><span class="p">.</span><span class="n">fetch_housing_data</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>And then I’m going to load the csv as a df using another function defined in <code class="language-plaintext highlighter-rouge">utils.py</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="n">housing</span> <span class="o">=</span> <span class="n">ut</span><span class="p">.</span><span class="n">load_housing_data</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="initial-data-investigation">Initial Data Investigation</h3>
+
+<p>Now, taking a quick look at the data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>housing_median_age</th>
+      <th>total_rooms</th>
+      <th>total_bedrooms</th>
+      <th>population</th>
+      <th>households</th>
+      <th>median_income</th>
+      <th>median_house_value</th>
+      <th>ocean_proximity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-122.23</td>
+      <td>37.88</td>
+      <td>41.0</td>
+      <td>880.0</td>
+      <td>129.0</td>
+      <td>322.0</td>
+      <td>126.0</td>
+      <td>8.3252</td>
+      <td>452600.0</td>
+      <td>NEAR BAY</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-122.22</td>
+      <td>37.86</td>
+      <td>21.0</td>
+      <td>7099.0</td>
+      <td>1106.0</td>
+      <td>2401.0</td>
+      <td>1138.0</td>
+      <td>8.3014</td>
+      <td>358500.0</td>
+      <td>NEAR BAY</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-122.24</td>
+      <td>37.85</td>
+      <td>52.0</td>
+      <td>1467.0</td>
+      <td>190.0</td>
+      <td>496.0</td>
+      <td>177.0</td>
+      <td>7.2574</td>
+      <td>352100.0</td>
+      <td>NEAR BAY</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-122.25</td>
+      <td>37.85</td>
+      <td>52.0</td>
+      <td>1274.0</td>
+      <td>235.0</td>
+      <td>558.0</td>
+      <td>219.0</td>
+      <td>5.6431</td>
+      <td>341300.0</td>
+      <td>NEAR BAY</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-122.25</td>
+      <td>37.85</td>
+      <td>52.0</td>
+      <td>1627.0</td>
+      <td>280.0</td>
+      <td>565.0</td>
+      <td>259.0</td>
+      <td>3.8462</td>
+      <td>342200.0</td>
+      <td>NEAR BAY</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">.</span><span class="n">info</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 20640 entries, 0 to 20639
+Data columns (total 10 columns):
+ #   Column              Non-Null Count  Dtype  
+---  ------              --------------  -----  
+ 0   longitude           20640 non-null  float64
+ 1   latitude            20640 non-null  float64
+ 2   housing_median_age  20640 non-null  float64
+ 3   total_rooms         20640 non-null  float64
+ 4   total_bedrooms      20433 non-null  float64
+ 5   population          20640 non-null  float64
+ 6   households          20640 non-null  float64
+ 7   median_income       20640 non-null  float64
+ 8   median_house_value  20640 non-null  float64
+ 9   ocean_proximity     20640 non-null  object 
+dtypes: float64(9), object(1)
+memory usage: 1.6+ MB
+</code></pre></div></div>
+
+<p>A couple observations:</p>
+<ul>
+  <li>all features are floats except for ocean_proximity</li>
+  <li>total_bedrooms has some missing values</li>
+</ul>
+
+<p>And now taking a look at the categorical feature <code class="language-plaintext highlighter-rouge">ocean_proximity</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">[</span><span class="s">"ocean_proximity"</span><span class="p">].</span><span class="n">value_counts</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;1H OCEAN     9136
+INLAND        6551
+NEAR OCEAN    2658
+NEAR BAY      2290
+ISLAND           5
+Name: ocean_proximity, dtype: int64
+</code></pre></div></div>
+
+<p>Using describe to take a look at all numerical features.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">.</span><span class="n">describe</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>housing_median_age</th>
+      <th>total_rooms</th>
+      <th>total_bedrooms</th>
+      <th>population</th>
+      <th>households</th>
+      <th>median_income</th>
+      <th>median_house_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+      <td>20433.000000</td>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+      <td>20640.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>-119.569704</td>
+      <td>35.631861</td>
+      <td>28.639486</td>
+      <td>2635.763081</td>
+      <td>537.870553</td>
+      <td>1425.476744</td>
+      <td>499.539680</td>
+      <td>3.870671</td>
+      <td>206855.816909</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>2.003532</td>
+      <td>2.135952</td>
+      <td>12.585558</td>
+      <td>2181.615252</td>
+      <td>421.385070</td>
+      <td>1132.462122</td>
+      <td>382.329753</td>
+      <td>1.899822</td>
+      <td>115395.615874</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>-124.350000</td>
+      <td>32.540000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>1.000000</td>
+      <td>3.000000</td>
+      <td>1.000000</td>
+      <td>0.499900</td>
+      <td>14999.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>-121.800000</td>
+      <td>33.930000</td>
+      <td>18.000000</td>
+      <td>1447.750000</td>
+      <td>296.000000</td>
+      <td>787.000000</td>
+      <td>280.000000</td>
+      <td>2.563400</td>
+      <td>119600.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>-118.490000</td>
+      <td>34.260000</td>
+      <td>29.000000</td>
+      <td>2127.000000</td>
+      <td>435.000000</td>
+      <td>1166.000000</td>
+      <td>409.000000</td>
+      <td>3.534800</td>
+      <td>179700.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>-118.010000</td>
+      <td>37.710000</td>
+      <td>37.000000</td>
+      <td>3148.000000</td>
+      <td>647.000000</td>
+      <td>1725.000000</td>
+      <td>605.000000</td>
+      <td>4.743250</td>
+      <td>264725.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>-114.310000</td>
+      <td>41.950000</td>
+      <td>52.000000</td>
+      <td>39320.000000</td>
+      <td>6445.000000</td>
+      <td>35682.000000</td>
+      <td>6082.000000</td>
+      <td>15.000100</td>
+      <td>500001.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Now using matplotlib to look at histograms of each feature.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span> 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">housing</span><span class="p">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/nJ5LioYiYFoS4j39zX2Sbah_ZRepZ7XsX0JbQqFSOE3bHEHE88FL5OdYtTFrq7Cct8k_SCx6HOluTj9z5cVlhbZuTUbMrOyhyX-XUVmojfYqqAVe3QTtiac2mJwCTyblHNVh_75a9VU3PE4CGBnlmNcheQMpADEoGtiosymVX3_cY1iaHXJyg0fo926Pk9N2wjRz18gfwooTy3-qaa9sktp_HSd_Sn95bBFdtRNKun04FB1bhOvBaZmfC6Ok3ELyAP5taAIjKO_V1Jtgrc0A0ZPi9Pnc_3asbxPT6chqXQzr8DOX8wMSYamg-j-jdQxfxBugf3Du5_zmhmfJIHLMQUC059tK2dXPTNJs4kdMD7u_gwx_kwRhVBGi08dvbiSeCbpQxmGPJKbcBExNV2BkB3HjKlzSoTw8iQeyZjxOYQCiUFj6ADrAB3lW2Ie-69pLUBs03_RskKHgT1IMEjGaNyWtDKRD9BkPkcRPzrE_YOKcMzwXHWzkqnhTy0-A2PeDx98C3cOq80hDnZJhYgvMnnX8eTGeDtx12sHY9qJCReFVbFXqOP4zctSPwC5tOyYFNEWrslWm1wGkG9d3uJsCYrWELVPcvJqd0juDTIcnKNE6rjyGZBZoR8JvFYi7hkPxQxGTXta7w15Ndvc2UNK1xQv_llzgF88JKeaGHiSgWfhVSWZNkfwtl6mveFwAHtBk_XNawPT2g0Tcgi2qEI4nLoAb6WOtw7JQnWBNeXsAL1bmXrQ9BHb4oHkPDBq38P1tkiCxC19uGl2srGuLe_EfkbImzZ_6cW_-_WTZniZpaWOFbgYFc531qWM1lZ1e0G293a6bi_jUZSHMjVCO9hCvgEvFGT1QdlI89bdhxXLrQkBFRIysiyJI4spff9vD56gpij6GrdhgJ01MA8aESFrr9Dm-tiZSTTgFQ8qvotV_CDbO3TM28FGBC3M-6UTYkVlIZMI4dE9l7Njv1C41G0ZW=w1167-h862-s-no?authuser=1" alt="histograms" /></p>
+
+<p>Histogram observations:</p>
+<ul>
+  <li>median income is not in USD, ~10s of thousands</li>
+  <li>housing_median_age &amp; median_house_value were capped</li>
+  <li>features have very different scales</li>
+  <li>many histograms are tail-heavy</li>
+</ul>
+
+<h3 id="split-data">Split Data</h3>
+<p>Now I’m going to split data into train and test sets.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="n">train_set</span><span class="p">,</span> <span class="n">test_set</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">housing</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Or if I want to do stratified splitting instead, for example median_income is likely a very important feature and looking at the histogram, most values are 1.5 - 6.0.  So defining custom income categories below and taking a look at a quick histogram.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="n">housing</span><span class="p">[</span><span class="s">"income_cat"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">cut</span><span class="p">(</span><span class="n">housing</span><span class="p">[</span><span class="s">"median_income"</span><span class="p">],</span>
+                               <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">inf</span><span class="p">],</span>
+                               <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+
+<span class="n">housing</span><span class="p">[</span><span class="s">"income_cat"</span><span class="p">].</span><span class="n">hist</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/3VSs-46w0f7C2ZNLfq7IfK-LiWvhunUkjJOOH-A4ZAiqNfWSBDtjJKpqfHwVwJyJpg-KEqAAeShikx0ov3fumWFna9oE-5vbpKLaTA_yfPKQy2SBH561_1EEbWhgS-zF49tZQ7DBKzTUbOQu5H-Oi2r5S3jJB1QXPjneoHkF0XnMTcJa5D-cTa3uGeOucZyYPeV7-a1lHGMwTygDALONOaTewE87TBJab9VO-jUfbGBtOF5UAh2ercQB9-2On5hujEDOP9eFI-VTweXA3RbhcAtftJo6Kef156FioSr2uZvF5gyaIGM0dXLbVqcBgFrGR9-iu1I-JD3-Jh2Ouq76pN-8QQH4OTZQT2fcOQgvKcbRqsJekYw9gZaPDDzE8JPglmVgF84PPG8gZgwWjD-ddv1TLc0KB_33ekamGymc80rXfPY8G__fsULPCnu4dEvUwvjI47WShUdx_Go5XO39jWxVlWzDtPG4Oea6VMBmczq8Hu1UrEynd-FBh3Xut5JVD0PebtwVkXGp7g2t0J6X1bMVZPGEPtE-6ImPcd20A1K_FHrklQyczHU5QDcENa8FqE3a42SEBXCLBaiJMvW_v3uxqqoRGZks-r3RaiUZBKwqc0ZmYkYqhhiHj6LKoXNOnrGDObXbhhyZ9klIap1SSpgnZGWudQasSJHbi4jRr0cehg_AqQBqO4KpF0Q766aijBciCQ5JxXKLaVRMMgsNq8omwntLku4Xt4Db0GvSGx4N2Pi8e7a8UPJBSLUhKk0tHuPaDK5868Jh93zUk_Dlg_HGqnoOz0y2cwIaZHBctFZNDAWxI3RFPAEg2V0vsuce9xF6gjJQpDaPhMYX2dOfH-D_YKLVhGCnhj5UGBdrJGjsY552qT5w52BIITKkyZ6HQSet9p9LugK981426qsaliPsjKqy7yUHJq0XNe7RPVLuo5X1-wUd6SH80JBxFoW5a3Ia6vfQrN8jfNN4q09m=w381-h248-s-no?authuser=1" alt="income category" /></p>
+
+<p>Now I’ll use <code class="language-plaintext highlighter-rouge">StratifiedShuffleSplit</code> from <code class="language-plaintext highlighter-rouge">sklearn</code> along with my newly defined income category.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedShuffleSplit</span>
+<span class="n">split</span> <span class="o">=</span> <span class="n">StratifiedShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">split</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">housing</span><span class="p">,</span> <span class="n">housing</span><span class="p">[</span><span class="s">"income_cat"</span><span class="p">]):</span>
+    <span class="n">strat_train_set</span> <span class="o">=</span> <span class="n">housing</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+    <span class="n">strat_test_set</span> <span class="o">=</span> <span class="n">housing</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+
+<span class="c1">#making sure it worked
+</span><span class="k">print</span><span class="p">(</span><span class="s">"test ratios:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">strat_test_set</span><span class="p">[</span><span class="s">"income_cat"</span><span class="p">].</span><span class="n">value_counts</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">strat_test_set</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"train ratios:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">strat_train_set</span><span class="p">[</span><span class="s">"income_cat"</span><span class="p">].</span><span class="n">value_counts</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">strat_train_set</span><span class="p">))</span>
+
+<span class="c1">#dropping income_cat
+</span><span class="k">for</span> <span class="n">set_</span> <span class="ow">in</span> <span class="p">(</span><span class="n">strat_train_set</span><span class="p">,</span> <span class="n">strat_test_set</span><span class="p">):</span>
+    <span class="n">set_</span><span class="p">.</span><span class="n">drop</span><span class="p">(</span><span class="s">"income_cat"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test ratios:
+ 3    0.350533
+2    0.318798
+4    0.176357
+5    0.114583
+1    0.039729
+Name: income_cat, dtype: float64
+train ratios:
+ 3    0.350594
+2    0.318859
+4    0.176296
+5    0.114402
+1    0.039850
+Name: income_cat, dtype: float64
+</code></pre></div></div>
+
+<h2 id="discover-and-visualize-the-data">Discover and Visualize the Data</h2>
+
+<h3 id="geographical">Geographical</h3>
+<p>I’m using <code class="language-plaintext highlighter-rouge">matplotlib</code> to take a look at the geographical spread of data and further investigate.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#create a copy of training set to explore
+</span><span class="n">housing</span> <span class="o">=</span> <span class="n">strat_train_set</span><span class="p">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1">#take a look at the data geographically 
+</span><span class="n">housing</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">"scatter"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">"longitude"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s">"latitude"</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/iNMhABzuokGxX0WG0SisIqpSs1WIOg4eIOW33lXDkarUtKX23NMwpoiXBij4SRPr5tRMtH_wEZXCYGrKxjq0Csbld-3hN6Sa2dt9ChGy42AGFD4Z71M8WG7mQ8jsw3IkhHqVnNODBfw-1FiZNKwcjTwQ0ATK9XNP7YOx21JMtc1F7N1Jb2Y_JfXDsdBcfYLgMITSX8BQdYgLdGSrkHauBt4QwNpu0zF73gRWOEz_fdWC3-GgbQ7s1CrMzSRcewHNuAgpzZ76eWc0CKdSD87ftcZ4who-RHWIJ8F5-RE7hj11rNrKCib0WW9c6y3Q-dKMYdWGmCmrrifBUR6yUAA0ZxU9NW7iN5KYb1yixFfyiQqqe_XrKnWHFyfU6dvPb9rqMlASNPuwQLCs9bp4kvQfv3sNtZu8tZPtC5gxXMdGV2wg1-PlfZtM_vDn60J4_n96YMX_gyiA7s9ifkq5xrNVh6v4g30o0lhXjxhluWwGOViQhZ8B8J8WYuBdZ3x0VlPHJju1Gn31VTO92QBII1LCxSW5RVPvmK1FLvGagmfzOHbbILi7BrFyxxEzh17BzqwYdCOpl6hsyHAOB_cI9chIVpkm3W2lIJo2bPtCMkF6GJSc2bjaEGp0si7F1s5vkp3bRXHK6Tw1oVmH092mGmsof13CZiSHvjohXkUiFOpvqZI4Hf9qY94gj6-kAh30RsT-cCsRRGqhs8XOHTkXxx7fECRvPz_vlxIo_MOPu8jGzmg6GDSVExPRpPKbOWKwSO7srFXFSj1Hz9jJbO5Pe39P8VAO3Yn8DQemfZCykj9-ZwAhMP3dP8T6g6c8BhKlNhMQuY-X1miov5MeR17YE7ARpAnrj3To5u478wmlgJNtbybj5Qo-m2hbhKt515uiKZnbv-bmnsmCT677Zg6WIa5GS2ixUfWhRU0cpPLFkYcNJAoKvNSeApr2eTiM3UU1baFCysVwBXhDgK63I9xqL5iq=w390-h262-s-no?authuser=1" alt="mapped locations" /></p>
+
+<p>All I see here is the state of Ca, so I’m going to start by increasing transparency to see density.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">"scatter"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">"longitude"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s">"latitude"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/rfxuLVQGjASz4hBCAoVe8x6FAqyl2zGjEtz1UlIjNE7Yv4jO9BlphsCSL8gH296dTvf0G6ZQQB7dBwmwN1OUJqZCdUT2bBQ7N6ubPl839OpZX7UqNFG4a1CVPtC2MNilt3VGMgew78uyuPu4w33S_Ll5SNP7wFmYxvmkHLOYOM9If5hsxLkvBKFjB6MRroWGxu6ciwTzpTWoMypvXAmro0TjWqNUJcP813_ePVDObKqTIxY76KPjeyOzfMnEMeNPcch-iPLbmo4qUe3dpHR-LMwMHdFRZcb2JXSNxgi2PtkNqFI3Jhncj-6GYU-rquU_-0hjd5oR8LX2YdRQKY1GIXcI-A6HQ5rBmij6Dl9JFbZ12N1pCXCBg1j14SVonFM59fy3kLnO2g9FegAc29gXDHOiJBmR6y78oOVbZohTUlqT_yzwzQbUm1Rfp5dSBN5Lp2ppEuhsv4hjMhS6mcC2YobawzsNEsJBmEjbLYoekKQnflNE_CizhHVLaOwpxLvR2cXiuxf0a5qDdbulIyz-V_IrYHW4foFVL6Ot4XhKLfP4xDvRSdtzxG5GwDstPn0Z2pB2R9lyFtYx1tkxENkpkAFcQxihpMlmnhGlsyu1og5cXMYazcbD8XXuQp4GMOUKJDNRwvx0Kfb0T8qOIM6NHenVYARrJOFq8Q7apcR7tSWZvbrOxf0cs4LbHZrORVvs5osMD4Q8yI1FYnvji6s9gznlgjMp8e0vC0xEMwfQphtR0KCPWJ4Lepib_CLHCDZXLruORXXMcPDw-7Rdd69INTpvnE7FyfAOtC8vSATG0A7tRzVRscNXKCZx-Jb8Ln7wg8e8U9E3lLh0YWqte59snIQCmDutfa5lXtY9_E9HtahHnjflsBgmrL-MDBf8Onmd5aZIWi0Zo9m1Q5epVXsaHwn46DjWRgJ0fgAC1WU3GPSAAHRab_vhAQRDZR1pQg49srjYd4r_kf_AJjhZFaJE=w390-h262-s-no?authuser=1" alt="cluster map" /></p>
+
+<p>Now I can see the clusters around LA, SF, and Sacramento.  I’ll add a couple more variables to the plot:</p>
+<ul>
+  <li>point size (s) is population</li>
+  <li>point color (c) is median house value, the target variable</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">"scatter"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">"longitude"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s">"latitude"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+             <span class="n">s</span><span class="o">=</span><span class="n">housing</span><span class="p">[</span><span class="s">"population"</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">"population"</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span>
+             <span class="n">c</span><span class="o">=</span><span class="s">"median_house_value"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="p">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s">"jet"</span><span class="p">),</span> <span class="n">colorbar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/p7_1-3VBwENiIV_yRwuCcI_186SXNIPEVOiwz5583aPzShqMq6cL9NJmha9kGmmEVu1IP_ah5RnoEcg4RyGZ31ygR4oOV-q4Lg3w8mncYM2SWjTWLD3tiwSiULCkc_rd6Bq2-m6vGtFZupWpgNARPq8UkERvoPGQ0ayHiJ8UysmBiyrJx-z4QB0MbZs9fT4H0lISZTHOI6zUZQYHDOKvz1VZU9qAVY58qEqpUw9NnkfFldCfffHxVJqpCykfK6fImRKy4q4xk7cEOF14Yoqh37TYZSxqgeq459mcUdE_bwuosvw0E4UlOKdQHh17Sz_xKIxBUzENlC-kPdC2po_j3zJ1VeFmd29KTRXKmnLMVqNxDNtPv159w38wx6TAU_h2mIpHEzpvZCmsmlNIGWn0U06T-He89XmM6J_RuS65M8lusaEQ0QXv_9ItOKT1s9vpsabH0Jng5y4HYP1snGxCeH4YHF3Z4EpA2DlWCeEmauy72I1AQgeggnwzrLU8tCYAGFqMgVuBTqjxmlai5tm2eCRSS3y4XoJpKrAi2c8Sie8void_UfbJDSCfwq3IL-rUijKOGpsqZHW8kQnG5L6kqLNrFAfounr-oVcdyEI0VDK0eeYTM75HaHpPHJCTyEcsznlgPwCcau379uSGjkf14CrybHVghN7oY8RhqGYQSLaMRB_3ZOfGpcJgh-dYWg2Llou-nPJR1FY8_j1Yrdq49X1sHHwSECwHhxbPb18GuH1iQNYTIMiS1EPCkDV-QqMlgZcJ484t8BPnetXwXit0-3bOuOMtdJQNIuk9Wx_bii-ZAFeK-en1-6nk7Zla7dpT2weHOS7wNGZlyit3dCnlNVeqvabwNjRA9vkEOIdnLAUZ_LxoZxuYsaBHN_vnngfmQmrxhgXggTsnBKdxtlENI9kLJTiCnHpLsIvkCLP1XsUAPigQVj7bvL9ZJzqcOLZ1TjW69MJ1enrsmdwEqcSf=w601-h402-s-no?authuser=1" alt="final map" /></p>
+
+<p>This plot gives me much more information, including the follow observations which will likely help me in model selection/building:</p>
+<ul>
+  <li>Median house value is highly dependent upon location, e.g. how close to the ocean?</li>
+  <li>Median house value is highly dependent upon population density.
+    <ul>
+      <li>A clustering algorithm could be used for detecting main population clusters and defining a new feature of distance to main clusters.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="correlation-analysis">Correlation Analysis</h3>
+<p>In order to get an idea of how well each feature correlates with the target variable, I’m going to run a correlation analysis and check the results for median house value.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">housing</span><span class="p">.</span><span class="n">corr</span><span class="p">()</span>
+<span class="n">corr_matrix</span><span class="p">[</span><span class="s">"median_house_value"</span><span class="p">].</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>median_house_value    1.000000
+median_income         0.687160
+total_rooms           0.135097
+housing_median_age    0.114110
+households            0.064506
+total_bedrooms        0.047689
+population           -0.026920
+longitude            -0.047432
+latitude             -0.142724
+Name: median_house_value, dtype: float64
+</code></pre></div></div>
+
+<p>There are a few promising features here, including <code class="language-plaintext highlighter-rouge">median_income</code>, <code class="language-plaintext highlighter-rouge">total_rooms</code>, and <code class="language-plaintext highlighter-rouge">housing_median_age</code>, so I’m going to look at scatter plots for each.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pandas.plotting</span> <span class="kn">import</span> <span class="n">scatter_matrix</span>
+<span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s">"median_house_value"</span><span class="p">,</span> <span class="s">"median_income"</span><span class="p">,</span> <span class="s">"total_rooms"</span><span class="p">,</span> <span class="s">"housing_median_age"</span><span class="p">]</span>
+<span class="n">scatter_matrix</span><span class="p">(</span><span class="n">housing</span><span class="p">[</span><span class="n">attributes</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/_6X2kOZVGOGNG9uZdGANNFWVDQT4eWKUyUQPKvq9w7F87vPEV0z82tq7l7iJovBHeW6uPcCDB_kASYrgD_zGdpLERwzqVOb6L-u-O6xJgfjHsHplofBlwPvUlZJABXdZNeJAYwWJpljDQaLM6GZoVyn2N6jo55SdywhXRV7Br3MDB6Mz4AV1hA3ALKsHTsHysd-t29ubzFe259XTJS_TospJiCX0wEjA8qN1M6q28ZbCNIXaDyKudk2AcSwo-_NDQvSt3fpG3dQ3r5ABJK_rBs8EjLYRVHGkqnHlCre6qfFJM7LKB6bDe8GRVJEWj2Fr0avBg31JxnV30aiYaQFGf3QrjzNKtLM4jl_sjHsLsUKHos_9Si_aN7YBInR-bvRLpBQaGIL_z9sZTtUnSvN-UPkMTJxpd3VhP-gEmxx1u6pCMK1xPsLvlbW8leHtm2xc_XeIPs8Lr1-TQrlWDGJxWmeb5uA2aIxI9TpTtZ9Gqrb3nXD2K4rN1A7YkeYAiwlKHoeQRlj8nmPb8JPjhx48Bm2m_cdBxdlTenQZcZJ1YSg3qVMjtEhvuS-ex7px18FB6b-D_7JADZOdRv6-6Uzqjvm4bFYYsMsqVT9uncLJKeY8SC-lH_J3hEyg-7GA5XnVTJ1dul7fmoBZFsNxcDM8AghGTAQKOf5JlCO7ST2rDR00rAHBD0Xg_FhZOdhOZ-tIe2lsIK1IsJbUi2FbgK00l2fy1KzhHFS906HaMn84otax_a3fixJLq8-SxyAP7H4Nem7o7YDH2wDjeYhB1JSLoXzg1U1uoXhDV58_A4orfjyOcEkG-REgsVpHIRuPUEih5yS7iFYZLTqfo9zmntUdCiPa1G2WoAg0opFZ_X5BZDwLIs5f4wizU9KSEa2HAzqvf01yOC5n6lIDEVTVqjeO5k6169hvxYknedBPrkGcMrYdtaNVeHyY5iXDkgY5ZIh5axwZFzxkJdQGsNrd5AVX=w736-h501-s-no?authuser=1" alt="biplots" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#taking a closer look at the median_income correlation
+</span><span class="n">housing</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">"scatter"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">"median_income"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s">"median_house_value"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://lh3.googleusercontent.com/AmR_Et5LyvjiPD8FfL2xLkT-oPnzLFnyf23IrT1AvKFSUKiARniYnixI5Ok1FL27mQy9qrcvhryIX-dAZSZq7rXNQM5hZVe1dgpwJ9ZEb8K1ni-USVXypMD2IIBL525IHd2jRi8XwC5UBJoPkCd1uWK3XO8bI6HPN72YuGUwKruMKy__lmFp_PPhe-xc4-mYNaXU_qNG9Ah2Rbaam3Qnlyr-2K9iTrXXiLH327gY2let8a7FvaNVPODdQrRKgC7kcCnDUJr9IkXmS6mU5679xLTofQ78NOcSgp4l3f_zFXKGJhwrqR_Patwm8USTjAm25wPimFPlYk6DSuFFb4_sn4qhfCV1o2Y_RIq6GscrBLnbsu_1K6pLJwVAQ24BRw3EdTuNed4UHE-KUKBICcd7RNNvsq4tPh-FHEC-x4_ocnGRW3o-v82V2ltDSCdkqUI4Bnsio6x8Pt6izJRLnKoyeWUlaMUDwZOWOw0vWPOE86E3odtE92cn2SmQ2f7S5ZtaL8sEH4dXOwgifEnzYHsdwZ5bdKXGb3Lyw_3aPCWF9OFcRj5R_6z6IQ63bja8j1htmsV0P-W_ACeIDdod-j3NgMUKR9OxkUtbC45112Phl1C2fJmRn9dBWRb7RD7ooyl8-HP0T8P4nrZL6Bwk-34pLdwZv97nIeX0UFmA4OY0JAExwTOLj4qLA_4PUMJ9t1jde_6vMfIoJSUWihmnQk2klC07x2ztC5jxnjNTqV_q5JTU0MsYxxbYvxAakgSKQ2c07nCfv4W5kH2iTIgO8bABWJylpH9IWPF0FCabTIIr0WhlCXLPwR04jioTz5YNIVHekeWGQZ2Fq5BDPfAxyFzi-QmiALZ52P91KVeMQjp_AS40w-tHWReGix8GHSQj9CkTc3FaKl-wdQCtJeiG993eeZkotM--A0NBermlnFdd4CIDQnB36G-rqmnp_TIdM447YQ-aH-JArDtQBgls3kXm=w409-h263-s-no?authuser=1" alt="biplot" /></p>
+
+<p>The price cap at 500,000 is clearly visible in this plot.  There are also a couple other horizontal lines at 450,000, 350,000, etc.  These districts may need to be removed before training a model.  The next thing I’ll try is combining a couple features to see if they correlate well with the target variable.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">housing</span><span class="p">[</span><span class="s">"rooms_per_household"</span><span class="p">]</span> <span class="o">=</span> <span class="n">housing</span><span class="p">[</span><span class="s">"total_rooms"</span><span class="p">]</span><span class="o">/</span><span class="n">housing</span><span class="p">[</span><span class="s">"households"</span><span class="p">]</span>
+<span class="n">housing</span><span class="p">[</span><span class="s">"bedrooms_per_room"</span><span class="p">]</span> <span class="o">=</span> <span class="n">housing</span><span class="p">[</span><span class="s">"total_bedrooms"</span><span class="p">]</span><span class="o">/</span><span class="n">housing</span><span class="p">[</span><span class="s">"total_rooms"</span><span class="p">]</span>
+<span class="n">housing</span><span class="p">[</span><span class="s">"population_per_household"</span><span class="p">]</span> <span class="o">=</span> <span class="n">housing</span><span class="p">[</span><span class="s">"population"</span><span class="p">]</span><span class="o">/</span><span class="n">housing</span><span class="p">[</span><span class="s">"households"</span><span class="p">]</span>
+<span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">housing</span><span class="p">.</span><span class="n">corr</span><span class="p">()</span>
+<span class="n">corr_matrix</span><span class="p">[</span><span class="s">"median_house_value"</span><span class="p">].</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>median_house_value          1.000000
+median_income               0.687160
+rooms_per_household         0.146285
+total_rooms                 0.135097
+housing_median_age          0.114110
+households                  0.064506
+total_bedrooms              0.047689
+population_per_household   -0.021985
+population                 -0.026920
+longitude                  -0.047432
+latitude                   -0.142724
+bedrooms_per_room          -0.259984
+Name: median_house_value, dtype: float64
+</code></pre></div></div>
+
+<p>Nice!  <code class="language-plaintext highlighter-rouge">bedrooms_per_room</code> is much more correlated with median house value than <code class="language-plaintext highlighter-rouge">total_rooms</code> or <code class="language-plaintext highlighter-rouge">total_bedrooms</code>. <code class="language-plaintext highlighter-rouge">rooms_per_household</code> is also more informative than <code class="language-plaintext highlighter-rouge">total_rooms</code>.</p>
+
+<h2 id="prepare-the-data">Prepare the Data</h2>
+
+<h3 id="handling-missing-values">Handling Missing Values</h3>
+
+<p><code class="language-plaintext highlighter-rouge">total_bedrooms</code> has missing values in approx 200 rows.  A couple options for handling this include:</p>
+<ul>
+  <li>drop all observations with missing values
+    <ul>
+      <li>housing.dropna(subset=[“total_bedrooms”])</li>
+    </ul>
+  </li>
+  <li>drop the feature entirely
+    <ul>
+      <li>housing.drop(“total_bedrooms”, axis=1)</li>
+    </ul>
+  </li>
+  <li>impute missing values with constant, e.g. median
+    <ul>
+      <li>median = housing[“total_bedrooms”].median()</li>
+      <li>housing[“total_bedrooms”].fillna(median, inplace=True)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Instead I’m going to use <code class="language-plaintext highlighter-rouge">SimpleImputer</code> from <code class="language-plaintext highlighter-rouge">sklearn</code> so I can build into a pipeline later.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#fresh copy of training dataset
+</span><span class="n">housing</span> <span class="o">=</span> <span class="n">strat_train_set</span><span class="p">.</span><span class="n">drop</span><span class="p">(</span><span class="s">"median_house_value"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">housing_labels</span> <span class="o">=</span> <span class="n">strat_train_set</span><span class="p">[</span><span class="s">"median_house_value"</span><span class="p">].</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="n">imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s">"median"</span><span class="p">)</span>
+
+<span class="c1">#this can only be applied to numerical attributes
+</span><span class="n">housing_num</span> <span class="o">=</span> <span class="n">housing</span><span class="p">.</span><span class="n">drop</span><span class="p">(</span><span class="s">"ocean_proximity"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">#now to fit the imputer to the training data
+</span><span class="n">imputer</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_num</span><span class="p">)</span>
+
+<span class="c1">#only the total_bedrooms varialbe had missing values but we can't be sure that 
+#   will be true for new data so it's safer to fit all features
+</span>
+<span class="c1">#now to transform the numeric values
+</span><span class="n">X</span> <span class="o">=</span> <span class="n">imputer</span><span class="p">.</span><span class="n">transform</span><span class="p">(</span><span class="n">housing_num</span><span class="p">)</span>
+<span class="c1">#and if I want to put it back into a df
+</span><span class="n">housing_tr</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">housing_num</span><span class="p">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">housing_num</span><span class="p">.</span><span class="n">index</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="handling-text-and-categorical-features">Handling Text and Categorical Features</h3>
+
+<p>The only text feature in this dataset is <code class="language-plaintext highlighter-rouge">ocean_proximity</code> and when we looked at it above we saw that it wasn’t free or arbitrary text, but rather categorical with 5 possible values.  There are a couple common ways to encode this variable for use in our model:</p>
+<ul>
+  <li>Ordinal encoding, where each possible category is assigned an integer value.  This works well for categories which have an inherent order to them, e.g. bad, average, good, because the model will assume that two values which are near each other are more similar than two that are far apart.</li>
+  <li>One-hot encoding, where a new binary feature is defined for each possible category and a value of 0 or 1 is assigned.</li>
+</ul>
+
+<h4 id="ordinal-encoding">Ordinal Encoding</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OrdinalEncoder</span>
+<span class="n">ordinal_encoder</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">()</span>
+<span class="n">housing_cat</span> <span class="o">=</span> <span class="n">housing</span><span class="p">[[</span><span class="s">"ocean_proximity"</span><span class="p">]]</span>
+<span class="n">housing_cat_encoded</span> <span class="o">=</span> <span class="n">ordinal_encoder</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">housing_cat</span><span class="p">)</span>
+<span class="n">ordinal_encoder</span><span class="p">.</span><span class="n">categories_</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[array(['&lt;1H OCEAN', 'INLAND', 'ISLAND', 'NEAR BAY', 'NEAR OCEAN'],
+       dtype=object)]
+</code></pre></div></div>
+
+<p>I could either think carefully around exactly the order of categories I need for ordinal encoding or simply apply one-hot encoding, as it generally seems to be the preferred option if your memory can handle it.</p>
+
+<h4 id="one-hot-encoding">One-Hot Encoding</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="n">cat_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span>
+<span class="n">housing_cat_1hot</span> <span class="o">=</span> <span class="n">cat_encoder</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">housing_cat</span><span class="p">)</span>
+<span class="n">housing_cat_1hot</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;16512x5 sparse matrix of type '&lt;class 'numpy.float64'&gt;'
+	with 16512 stored elements in Compressed Sparse Row format&gt;
+</code></pre></div></div>
+
+<p>It is interesting to note here that the resulting object is stored as a sparse matrix rather than a more typical numpy array.  This is a far more memory efficient format as it only stores the locations of the non-zero elements.  It can be used just like any other 2D arrays.</p>
+
+<h3 id="custom-transformers">Custom Transformers</h3>
+
+<p>You can also write your own custom transformers for tasks such as custom cleanup ooperations or combining specific attributes.  If you’re careful to write these transformers in such a way to work with Scikit-Learn functionalities (e.g. pipelines) then they can be very powerful.  In particular you need to create a class and implement the following three methods:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">fit()</code>, returning self</li>
+  <li><code class="language-plaintext highlighter-rouge">transform()</code></li>
+  <li><code class="language-plaintext highlighter-rouge">fit_transform()</code></li>
+</ul>
+
+<p>You can get <code class="language-plaintext highlighter-rouge">fit_transform()</code> for free by simply adding <code class="language-plaintext highlighter-rouge">TransformerMixin</code> as a base class.  If you add <code class="language-plaintext highlighter-rouge">BaseEstimator</code> as a base class (and avoid <code class="language-plaintext highlighter-rouge">*args</code> and <code class="language-plaintext highlighter-rouge">**kargs</code> in your constructor), you will also get two extra methods (<code class="language-plaintext highlighter-rouge">get_params()</code> and <code class="language-plaintext highlighter-rouge">set_params()</code>) that will be useful for automatic hyperparameter tuning.  As an example, below is a small transformer class that adds the combined features I investigated above.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+
+<span class="c1">#define column locations
+</span><span class="n">rooms_ix</span><span class="p">,</span> <span class="n">bedrooms_ix</span><span class="p">,</span> <span class="n">population_ix</span><span class="p">,</span> <span class="n">households_ix</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="k">class</span> <span class="nc">CombinedAttributesAdder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+    <span class="c1">#one hyperparameter: add_bedrooms_per_room
+</span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">add_bedrooms_per_room</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span> <span class="c1">#no *args or **kargs
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">add_bedrooms_per_room</span> <span class="o">=</span> <span class="n">add_bedrooms_per_room</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="c1">#nothing to fit
+</span>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="c1">#generate combined attributes
+</span>        <span class="n">rooms_per_household</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">rooms_ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">households_ix</span><span class="p">]</span>
+        <span class="n">population_per_household</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">population_ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">households_ix</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">add_bedrooms_per_room</span><span class="p">:</span>
+            <span class="n">bedrooms_per_room</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">bedrooms_ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">rooms_ix</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">c_</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">rooms_per_household</span><span class="p">,</span> <span class="n">population_per_household</span><span class="p">,</span> <span class="n">bedrooms_per_room</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">c_</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">rooms_per_household</span><span class="p">,</span> <span class="n">population_per_household</span><span class="p">]</span>
+
+<span class="n">attr_adder</span> <span class="o">=</span> <span class="n">CombinedAttributesAdder</span><span class="p">(</span><span class="n">add_bedrooms_per_room</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">housing_extra_attribs</span> <span class="o">=</span> <span class="n">attr_adder</span><span class="p">.</span><span class="n">transform</span><span class="p">(</span><span class="n">housing</span><span class="p">.</span><span class="n">values</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In this example the transformer has one hyperparameter, <code class="language-plaintext highlighter-rouge">add_bedrooms_per_room</code>, which is set to True by default.  By using this in the hyperparameter tuning step, I will be able to tell whether or not adding this additional feature actually improves the model.  Furthermore, adding hyperparameters to gate any data preparation step that you are not 100% sure about is generally a good idea.  The more automation you do up front, the more combinations you can automatically try out, making it much more likely that you’ll end up with a good combination.</p>
+
+<h3 id="feature-scaling">Feature Scaling</h3>
+
+<p>Feature scaling is typically very important when it comes to ML models as most don’t work well with features that are of differing scales.  There are two common ways of feature scaling in Sci-Kit Learn:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">MinMaxScaler</code> - sometimes called normalization is the simplest.  It takes each value, subtracts the min and divides by the max - min.  In this way, all features are scaled to 0 - 1.</li>
+  <li><code class="language-plaintext highlighter-rouge">StandardScaler</code> - first subtracts the mean (so standardized values always have a zero mean) and then divides by the standard deviation so the resulting distribution has unit variance.</li>
+</ul>
+
+<p>Standardization does not bound values to a specific range, which may be a problem for some algorithms (e.g. neural networks) but standardization is much less affect by outliers.  For example, suppose a district had a median income of 100 by mistake, then normalization would cram all other values from 0-15 down to 0-0.15, whereas standardization would not be much affected.  I’m going to apply standardization in the next section on pipelines.</p>
+
+<h3 id="pipelines">Pipelines</h3>
+
+<p>Pipelines are hugely helpful in ML workflows, especially when tuning hyperparameters.  The pipeline constructor takes a list of name/estimator pairs defining a sequence of steps.  All but the last estimator must be transformers (i.e., they must have a <code class="language-plaintext highlighter-rouge">fit_transform()</code> method).  When you call the pipeline’s <code class="language-plaintext highlighter-rouge">fit()</code> method, it calls <code class="language-plaintext highlighter-rouge">fit_transform()</code> sequentially on all transformers, passing the output of each call as the parameter to the next call untill it reaches the final estimator, for which it calls the <code class="language-plaintext highlighter-rouge">fit()</code> mehod.  The pipeline exposes the same methods as the final estimator, which in the example below is a <code class="language-plaintext highlighter-rouge">StandardScaler</code> so it has a <code class="language-plaintext highlighter-rouge">fit_transform()</code> method, which is what I use instead.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">num_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">'imputer'</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s">"median"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s">'attribs_adder'</span><span class="p">,</span> <span class="n">CombinedAttributesAdder</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s">'std_scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="n">housing_num_tr</span> <span class="o">=</span> <span class="n">num_pipeline</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">housing_num</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Sci-Kit Learn also has the <code class="language-plaintext highlighter-rouge">ColumnTransformer</code> which allows you to apply pipelines to different columns, which can be defined using pandas column names.  This is very helpful for applying different transformations to numeric or categorical columns, as in the example below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="n">num_attribs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">housing_num</span><span class="p">)</span>
+<span class="n">cat_attribs</span> <span class="o">=</span> <span class="p">[</span><span class="s">"ocean_proximity"</span><span class="p">]</span>
+
+<span class="n">full_pipeline</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">"num"</span><span class="p">,</span> <span class="n">num_pipeline</span><span class="p">,</span> <span class="n">num_attribs</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"cat"</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(),</span> <span class="n">cat_attribs</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="n">housing_prepared</span> <span class="o">=</span> <span class="n">full_pipeline</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">housing</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="select-and-train-a-model">Select and Train a Model</h2>
+
+<p>First, I’ll fit a linear regression model to the data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">lin_reg</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span>
+<span class="n">lin_reg</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+
+<span class="c1">#checking performance with rmse
+</span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="n">housing_predictions</span> <span class="o">=</span> <span class="n">lin_reg</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">)</span>
+<span class="n">lin_mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">housing_labels</span><span class="p">,</span> <span class="n">housing_predictions</span><span class="p">)</span>
+<span class="n">lin_rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">lin_mse</span><span class="p">)</span>
+<span class="n">lin_rmse</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>68628.19819848922
+</code></pre></div></div>
+
+<p>Ok an rmse of $68,000 isn’t very good when you consider most district’s <code class="language-plaintext highlighter-rouge">median_housing_value</code> range between $120,000 and $265,000.  This model is clearly underfitting the data. Now I’m going to a more powerful model, <code class="language-plaintext highlighter-rouge">DecisionTreeRegressor()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+
+<span class="n">tree_reg</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">()</span>
+<span class="n">tree_reg</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+
+<span class="c1">#and evaluating rmse on the training set
+</span><span class="n">housing_predictions</span> <span class="o">=</span> <span class="n">tree_reg</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">)</span>
+<span class="n">tree_mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">housing_labels</span><span class="p">,</span> <span class="n">housing_predictions</span><span class="p">)</span>
+<span class="n">tree_rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tree_mse</span><span class="p">)</span>
+<span class="n">tree_rmse</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0.0
+</code></pre></div></div>
+
+<p>Ok, an rmse of 0 clearly tells us that this model is massively overfit.  It’s no surprise really since the model was trained on the entire training set and also evaluated on the same set.  In order to remedy the overfitting data, I need to split the training data into a training and validation set.</p>
+
+<h3 id="better-evaluation-using-cross-validation">Better Evaluation Using Cross-Validation</h3>
+
+<p>One way to accomplish this is to use <code class="language-plaintext highlighter-rouge">train_test_split()</code> again to split the training data into a training set and a validation set for model evaluation.  An alternative and often agreed upon better method is to use Sci-Kit Learn’s K-fold cross-validation feature.  The following code splits the training data into 10 distinct folds, then it trains and evaluates the Decision Tree model 10 times, picking a different fold for evaluation every time and training on the other 9 folds.  The result is an array containing the 10 evaluation scores.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">tree_reg</span><span class="p">,</span> <span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">,</span>
+                        <span class="n">scoring</span> <span class="o">=</span> <span class="s">"neg_mean_squared_error"</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1">#note that sklearn's cv features expect a utility function (lower is better) so the scoring function is actually the negative of MSE
+</span><span class="n">tree_rmse_scores</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">)</span>
+
+<span class="c1">#and displaying the scores
+</span><span class="k">def</span> <span class="nf">display_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Scores:"</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Mean:"</span><span class="p">,</span> <span class="n">scores</span><span class="p">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Standard Deviation:"</span><span class="p">,</span> <span class="n">scores</span><span class="p">.</span><span class="n">std</span><span class="p">())</span>
+
+<span class="n">display_scores</span><span class="p">(</span><span class="n">tree_rmse_scores</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scores: [69650.86819788 66756.26581791 71535.93489896 69736.26957968
+ 71483.70073511 75912.86258227 68667.89253772 71555.82238666
+ 76933.30336158 70814.62338016]
+Mean: 71304.75434779239
+Standard Deviation: 2934.9825767828343
+</code></pre></div></div>
+
+<p>Just as we suspected above, the model is overfitting the training data so badly that it’s performing worse on the validation set than the linear regression model.  I’m now going to try a couple more models below, <code class="language-plaintext highlighter-rouge">RandomForestRegressor</code> and <code class="language-plaintext highlighter-rouge">SVR</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#random forest
+</span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="n">forest_reg</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">()</span>
+<span class="n">forest_reg</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+<span class="c1">#evaluating rmse on the training set
+</span><span class="n">housing_predictions</span> <span class="o">=</span> <span class="n">forest_reg</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">)</span>
+<span class="n">forest_mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">housing_labels</span><span class="p">,</span> <span class="n">housing_predictions</span><span class="p">)</span>
+<span class="n">forest_rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">forest_mse</span><span class="p">)</span>
+<span class="c1">#evaluating rmse using cv
+</span><span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">forest_reg</span><span class="p">,</span> <span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">,</span>
+                        <span class="n">scoring</span> <span class="o">=</span> <span class="s">"neg_mean_squared_error"</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">forest_rmse_scores</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">)</span>
+<span class="n">display_scores</span><span class="p">(</span><span class="n">forest_rmse_scores</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scores: [49389.1546339  47464.22092432 49460.28008398 52289.23877996
+ 49604.96647304 53340.67810141 48438.42561798 47934.50166784
+ 52948.66234675 50116.11123813]
+Mean: 50098.62398673056
+Standard Deviation: 1974.0066738469416
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">forest_rmse</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>18822.598421559
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#support vector machine
+</span><span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVR</span>
+<span class="n">svm_reg</span> <span class="o">=</span> <span class="n">SVR</span><span class="p">()</span>
+<span class="n">svm_reg</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+<span class="c1">#evaluating rmse on the training set
+</span><span class="n">housing_predictions</span> <span class="o">=</span> <span class="n">svm_reg</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">)</span>
+<span class="n">svm_mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">housing_labels</span><span class="p">,</span> <span class="n">housing_predictions</span><span class="p">)</span>
+<span class="n">svm_rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">svm_mse</span><span class="p">)</span>
+<span class="c1">#evaluating rmse using cv
+</span><span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">svm_reg</span><span class="p">,</span> <span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">,</span>
+                        <span class="n">scoring</span> <span class="o">=</span> <span class="s">"neg_mean_squared_error"</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">svm_rmse_scores</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">)</span>
+<span class="n">display_scores</span><span class="p">(</span><span class="n">svm_rmse_scores</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scores: [111389.0681902  119541.25938571 116957.62830414 120447.19932481
+ 117618.15904234 122309.10351544 117634.40230741 121469.713921
+ 120343.01369623 118017.12860651]
+Mean: 118572.66762937943
+Standard Deviation: 2936.877586794944
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">svm_rmse</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>118580.68301157995
+</code></pre></div></div>
+
+<p>The random forest is far better than the decision tree regressor though it is still overfitting the data.  Possible solutions are to simplify the model, constrain it (i.e., regularize it), or get a lot more training data.  The SVM model I tried performs very poorly.  I’m not entirely sure why, but I likely didn’t choose the most appropriate kernel.  I’ll now move forward with a couple models into model tuning.</p>
+
+<h3 id="fine-tune-your-model">Fine-Tune Your Model</h3>
+
+<p>Sci-Kit Learn has a couple built in classes to optmize hyperparameters: <code class="language-plaintext highlighter-rouge">GridSearchCV</code> and <code class="language-plaintext highlighter-rouge">RandomizedSearchCV</code>.  In addition there are other libraries to do more optimized hyperparameter tuning, including Optuna, but I’m just looking into the Sci-Kit Learn options here.</p>
+
+<h4 id="gridsearchcv">GridSearchCV</h4>
+
+<p>In order to use <code class="language-plaintext highlighter-rouge">GridSearchCV</code> you supply it with one or more dictionaries of hyperparameter values and it tries all combinations of the values with cv scoring.  For example, the param grid below tells <code class="language-plaintext highlighter-rouge">GridSearchCV</code> to first evaluate all possible combinations of the first dict (3x4 = 12) and then try all possible combinations in the second grid (2x3 = 6), leading to 18 total combinations.  Since I specified 5 fold cv, that will lead to 5 x 18 = 90 rounds of training.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s">'n_estimators'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="s">'max_features'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s">'bootstrap'</span><span class="p">:</span> <span class="p">[</span><span class="bp">False</span><span class="p">],</span> <span class="s">'n_estimators'</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s">'max_features'</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]}</span>
+<span class="p">]</span>
+<span class="n">forest_reg</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">()</span>
+
+<span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">forest_reg</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s">'neg_mean_squared_error'</span><span class="p">,</span>
+    <span class="n">return_train_score</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">grid_search</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing_prepared</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GridSearchCV(cv=5, estimator=RandomForestRegressor(),
+             param_grid=[{'max_features': [2, 4, 6, 8],
+                          'n_estimators': [3, 10, 30]},
+                         {'bootstrap': [False], 'max_features': [2, 3, 4],
+                          'n_estimators': [3, 10]}],
+             return_train_score=True, scoring='neg_mean_squared_error')
+</code></pre></div></div>
+
+<p>You can get the best params directly using <code class="language-plaintext highlighter-rouge">.best_params_</code>.  Since 30 is the maximum <code class="language-plaintext highlighter-rouge">n_estimators</code> I evaluated, I should probably search again using even higher values.  You can also get the best estimator directly using <code class="language-plaintext highlighter-rouge">.best_estimator_</code> and of course the individual cv scores using <code class="language-plaintext highlighter-rouge">.cv_results_</code>.  It’s also good to note here that if <code class="language-plaintext highlighter-rouge">GridSearchCV</code> is initialized with <code class="language-plaintext highlighter-rouge">refit=True</code>, which is the default, then once it finds the best estimator using cv, it retrains on the whole training set.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">grid_search</span><span class="p">.</span><span class="n">best_params_</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{'max_features': 6, 'n_estimators': 30}
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">grid_search</span><span class="p">.</span><span class="n">best_estimator_</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RandomForestRegressor(max_features=6, n_estimators=30)
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cvres</span> <span class="o">=</span> <span class="n">grid_search</span><span class="p">.</span><span class="n">cv_results_</span>
+<span class="k">for</span> <span class="n">mean_score</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cvres</span><span class="p">[</span><span class="s">"mean_test_score"</span><span class="p">],</span> <span class="n">cvres</span><span class="p">[</span><span class="s">"params"</span><span class="p">]):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">mean_score</span><span class="p">),</span> <span class="n">params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>64096.428979611126 {'max_features': 2, 'n_estimators': 3}
+55370.45067516444 {'max_features': 2, 'n_estimators': 10}
+52828.40432351358 {'max_features': 2, 'n_estimators': 30}
+59520.862308977245 {'max_features': 4, 'n_estimators': 3}
+52712.49612037059 {'max_features': 4, 'n_estimators': 10}
+50721.04115644037 {'max_features': 4, 'n_estimators': 30}
+59086.637312506704 {'max_features': 6, 'n_estimators': 3}
+52225.11921182246 {'max_features': 6, 'n_estimators': 10}
+49915.38635628875 {'max_features': 6, 'n_estimators': 30}
+59908.18635411256 {'max_features': 8, 'n_estimators': 3}
+51902.7112591161 {'max_features': 8, 'n_estimators': 10}
+50073.94232440752 {'max_features': 8, 'n_estimators': 30}
+61806.362753358546 {'bootstrap': False, 'max_features': 2, 'n_estimators': 3}
+54274.47829225807 {'bootstrap': False, 'max_features': 2, 'n_estimators': 10}
+60373.16787959317 {'bootstrap': False, 'max_features': 3, 'n_estimators': 3}
+53027.58261195693 {'bootstrap': False, 'max_features': 3, 'n_estimators': 10}
+57811.522049925974 {'bootstrap': False, 'max_features': 4, 'n_estimators': 3}
+51808.8671353706 {'bootstrap': False, 'max_features': 4, 'n_estimators': 10}
+</code></pre></div></div>
+
+<p>I should also mention here that you can treat data preparation steps as hyperparameters as well, for example the <code class="language-plaintext highlighter-rouge">add_bedrooms_per_room</code> option we added to the <code class="language-plaintext highlighter-rouge">CombinedAttributesAdder</code> above.  <code class="language-plaintext highlighter-rouge">GridSearchCV</code> will then automatically find out whether or not to add a feature that we were unsure about.  Similarly, we could also use it to find the best way to handle outliers, missing features, feature selection, etc.</p>
+
+<h4 id="randomozedsearchcv">RandomozedSearchCV</h4>
+
+<p>In the example below I’m going to take the information from the previous tuning step and use <code class="language-plaintext highlighter-rouge">RandomizedSearchCV</code> to further refine the model.  First, I’m going to build a pipeline to include my data preparation steps so that I can include the <code class="language-plaintext highlighter-rouge">add_bedrooms_per_room</code> hyperparameter and I’ll center the ranges of the above hyperparameters around their best values from above.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#defining a full pipeline with preprocessing steps and model training
+</span><span class="n">num_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">'imputer'</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s">"median"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s">'attribs_adder'</span><span class="p">,</span> <span class="n">CombinedAttributesAdder</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s">'std_scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="n">ct</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">"num"</span><span class="p">,</span> <span class="n">num_pipeline</span><span class="p">,</span> <span class="n">num_attribs</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"cat"</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(),</span> <span class="n">cat_attribs</span><span class="p">)</span>
+<span class="p">])</span>
+<span class="n">rfr_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">'ct'</span><span class="p">,</span> <span class="n">ct</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">'rfr'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="c1">#define hyperparameter grid to be randomly searched
+</span><span class="n">param_grid</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s">'rfr__n_estimators'</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s">'rfr__max_features'</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s">'ct__num__attribs_adder__add_bedrooms_per_room'</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]}</span>
+<span class="p">]</span>
+
+<span class="c1">#run RandomizedSearchCV
+</span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
+<span class="n">rfr_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">rfr_pipeline</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s">'neg_mean_squared_error'</span><span class="p">,</span>
+    <span class="n">return_train_score</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">rfr_search</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+
+<span class="n">cvres</span> <span class="o">=</span> <span class="n">rfr_search</span><span class="p">.</span><span class="n">cv_results_</span>
+<span class="k">for</span> <span class="n">mean_score</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cvres</span><span class="p">[</span><span class="s">"mean_test_score"</span><span class="p">],</span> <span class="n">cvres</span><span class="p">[</span><span class="s">"params"</span><span class="p">]):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">mean_score</span><span class="p">),</span> <span class="n">params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>50688.647636169 {'rfr__n_estimators': 21, 'rfr__max_features': 8, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+50034.38735935574 {'rfr__n_estimators': 33, 'rfr__max_features': 5, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49979.657619467835 {'rfr__n_estimators': 38, 'rfr__max_features': 8, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49755.706801222084 {'rfr__n_estimators': 38, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49895.671695998695 {'rfr__n_estimators': 39, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49348.89105889358 {'rfr__n_estimators': 36, 'rfr__max_features': 7, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49885.774942888136 {'rfr__n_estimators': 27, 'rfr__max_features': 5, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+50354.94859316871 {'rfr__n_estimators': 28, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49708.4061229694 {'rfr__n_estimators': 26, 'rfr__max_features': 6, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49916.181465486436 {'rfr__n_estimators': 26, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49920.672697449874 {'rfr__n_estimators': 39, 'rfr__max_features': 7, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49930.48957724172 {'rfr__n_estimators': 29, 'rfr__max_features': 6, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+50150.01917026861 {'rfr__n_estimators': 22, 'rfr__max_features': 8, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49993.32026255731 {'rfr__n_estimators': 33, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+50324.41116608029 {'rfr__n_estimators': 22, 'rfr__max_features': 8, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49647.94486617563 {'rfr__n_estimators': 36, 'rfr__max_features': 7, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49547.70058617279 {'rfr__n_estimators': 37, 'rfr__max_features': 5, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+50210.83668911258 {'rfr__n_estimators': 24, 'rfr__max_features': 9, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49701.72186612198 {'rfr__n_estimators': 34, 'rfr__max_features': 6, 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49696.795226234186 {'rfr__n_estimators': 31, 'rfr__max_features': 5, 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+</code></pre></div></div>
+
+<p>It looks like I’ve improved my model an additional $300 or so by using the best combinations of hyperparams.  It’s also interesting to note that the best combination did not include the bedrooms_per_room feature, which means it’s likely worthless.  I’ll also note here that you can use <code class="language-plaintext highlighter-rouge">RandomizedSearchCV</code> or <code class="language-plaintext highlighter-rouge">GridSearchCV</code> to evaluate model algorithms as well.  I’ll provide an example below using both <code class="language-plaintext highlighter-rouge">RandomForestRegressor</code> as well as <code class="language-plaintext highlighter-rouge">SVR</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#include a general model placeholder
+</span><span class="n">mod_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">'ct'</span><span class="p">,</span> <span class="n">ct</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">'mod'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="c1">#define hyperparameter grid to be randomly searched
+</span><span class="n">param_grid</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">'mod'</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomForestRegressor</span><span class="p">()],</span>
+        <span class="s">'mod__n_estimators'</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s">'mod__max_features'</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> 
+        <span class="s">'ct__num__attribs_adder__add_bedrooms_per_room'</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">'mod'</span><span class="p">:</span> <span class="p">[</span><span class="n">SVR</span><span class="p">()],</span>
+        <span class="s">'mod__kernel'</span><span class="p">:</span> <span class="p">[</span><span class="s">'linear'</span><span class="p">,</span> <span class="s">'rbf'</span><span class="p">],</span> <span class="s">'mod__C'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s">'ct__num__attribs_adder__add_bedrooms_per_room'</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="c1">#run RandomizedSearchCV
+</span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
+<span class="n">mod_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">mod_pipeline</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s">'neg_mean_squared_error'</span><span class="p">,</span>
+    <span class="n">return_train_score</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">mod_search</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">housing</span><span class="p">,</span> <span class="n">housing_labels</span><span class="p">)</span>
+
+<span class="n">cvres</span> <span class="o">=</span> <span class="n">mod_search</span><span class="p">.</span><span class="n">cv_results_</span>
+<span class="k">for</span> <span class="n">mean_score</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cvres</span><span class="p">[</span><span class="s">"mean_test_score"</span><span class="p">],</span> <span class="n">cvres</span><span class="p">[</span><span class="s">"params"</span><span class="p">]):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">mean_score</span><span class="p">),</span> <span class="n">params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>49866.763374310045 {'mod__n_estimators': 37, 'mod__max_features': 9, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49556.5981387067 {'mod__n_estimators': 33, 'mod__max_features': 6, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49887.59172937205 {'mod__n_estimators': 33, 'mod__max_features': 9, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+112973.43813971068 {'mod__kernel': 'linear', 'mod__C': 1, 'mod': SVR(), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49725.011264272915 {'mod__n_estimators': 39, 'mod__max_features': 9, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49691.77323079302 {'mod__n_estimators': 30, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49888.7748159535 {'mod__n_estimators': 33, 'mod__max_features': 7, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49429.38487359406 {'mod__n_estimators': 38, 'mod__max_features': 6, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49869.091111047564 {'mod__n_estimators': 38, 'mod__max_features': 6, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+50074.34181027114 {'mod__n_estimators': 36, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+116125.14865684793 {'mod__kernel': 'rbf', 'mod__C': 10, 'mod': SVR(), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+84653.68946568908 {'mod__kernel': 'linear', 'mod__C': 10, 'mod': SVR(), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49988.259377928225 {'mod__n_estimators': 33, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49558.43344033735 {'mod__n_estimators': 37, 'mod__max_features': 8, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49503.607643476025 {'mod__n_estimators': 34, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+49825.12874956652 {'mod__n_estimators': 36, 'mod__max_features': 8, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49703.23680947157 {'mod__n_estimators': 38, 'mod__max_features': 7, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+50256.06603238222 {'mod__n_estimators': 31, 'mod__max_features': 9, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+49678.984418478 {'mod__n_estimators': 32, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+50292.04106290782 {'mod__n_estimators': 31, 'mod__max_features': 5, 'mod': RandomForestRegressor(max_features=6, n_estimators=38), 'ct__num__attribs_adder__add_bedrooms_per_room': True}
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mod_search</span><span class="p">.</span><span class="n">best_params_</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{'mod__n_estimators': 38,
+ 'mod__max_features': 6,
+ 'mod': RandomForestRegressor(max_features=6, n_estimators=38),
+ 'ct__num__attribs_adder__add_bedrooms_per_room': False}
+</code></pre></div></div>
+
+<h3 id="evaluate-your-system-on-the-test-set">Evaluate Your System on the Test Set</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">final_model</span> <span class="o">=</span> <span class="n">rfr_search</span><span class="p">.</span><span class="n">best_estimator_</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">strat_test_set</span><span class="p">.</span><span class="n">drop</span><span class="p">(</span><span class="s">"median_house_value"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">strat_test_set</span><span class="p">[</span><span class="s">"median_house_value"</span><span class="p">].</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">final_predictions</span> <span class="o">=</span> <span class="n">final_model</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="n">final_mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">final_predictions</span><span class="p">)</span>
+<span class="n">final_rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">final_mse</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"RMSE on Test set:"</span><span class="p">,</span> <span class="n">final_rmse</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RMSE on Test set: 47218.11203561605
+</code></pre></div></div>
+
+<p>Sometimes a point estimate of error is not good enough.  Below I’m generating a 95% confidence interval.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="n">confidence</span> <span class="o">=</span> <span class="mf">0.95</span>
+<span class="n">squared_errors</span> <span class="o">=</span> <span class="p">(</span><span class="n">final_predictions</span> <span class="o">-</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">stats</span><span class="p">.</span><span class="n">t</span><span class="p">.</span><span class="n">interval</span><span class="p">(</span><span class="n">confidence</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">squared_errors</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">loc</span><span class="o">=</span><span class="n">squared_errors</span><span class="p">.</span><span class="n">mean</span><span class="p">(),</span>
+                        <span class="n">scale</span><span class="o">=</span><span class="n">stats</span><span class="p">.</span><span class="n">sem</span><span class="p">(</span><span class="n">squared_errors</span><span class="p">)))</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([45251.39368577, 49106.12566586])
+</code></pre></div></div>]]></content><author><name>Coy McNew</name></author><category term="Machine Learning" /><category term="Python" /><category term="HandsOnML" /><category term="Python" /><category term="Machine Learning" /><summary type="html"><![CDATA[Purpose]]></summary></entry></feed>
