@@ -1,5 +1,3 @@
-# On-Site Presentation 2023-02-23
-
 # Machine Mindset: A communication platform for Data Practitioners
 
 ## Authors:
