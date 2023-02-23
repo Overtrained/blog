@@ -5,14 +5,15 @@
 - Ajayi, Moyo
 - McNew, Coy
 
-# 🎆How a Reflections Page will be Useful
+<details>
+    <summary><h1>🎆 How a Reflections Page will be Useful</h1></summary>
+    
+    - To assist in creating the visibility of the Data Science team, Coy and I thought we would start a team blog, or as we call it, a reflections page
+    - Other data science teams have used blogs and reflections pages to communicate their completed projects and highlight
+        - Example blog: Uber
 
-- To assist in creating the visibility of the Data Science team, Coy and I thought we would start a team blog, or as we call it, a reflections page
-- Other data science teams have used blogs and reflections pages to communicate their completed projects and highlight
-    - Example blog: Uber
-        
-        [Data / ML | Uber Blog](https://www.uber.com/blog/engineering/data/)
-        
+            [Data / ML | Uber Blog](https://www.uber.com/blog/engineering/data/)
+</details>
 
 # ✅ What type of content?
 
